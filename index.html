@@ -23,11 +23,13 @@ video{width:100%;background:#000;border-radius:10px;max-height:60vh}
 .ctl button{border:1px solid #c5d3d1;background:#fff;border-radius:8px;padding:7px 12px;font-size:14px}
 .ctl button.on{background:#d9a441;border-color:#d9a441;font-weight:700}
 ol{list-style:none;margin:0;padding:0}
-li{background:#fff;border-radius:10px;margin-bottom:8px;padding:12px;display:flex;gap:10px;align-items:center;border:2px solid transparent;cursor:pointer}
+li{background:#fff;border-radius:10px;margin-bottom:8px;padding:12px;border:2px solid transparent;cursor:pointer}
 li.cur{border-color:#d9a441}
-li .n{font-weight:700;color:#0f3d3e;min-width:92px;font-size:14px}
-li .t{flex:1;font-size:14px;line-height:1.5}
-li .m{font-size:12px;color:#6b8280;text-align:left}
+li .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+li .n{font-weight:700;color:#0f3d3e;font-size:14px}
+li .t{font-size:15px;line-height:1.6;margin:4px 0 6px}
+li .m{font-size:12px;color:#6b8280}
+li .act{margin-top:2px}
 li .done{color:#2e8b57;font-weight:700}
 .bar{height:4px;background:#e0e8e6;border-radius:2px;margin-top:6px}
 .bar i{display:block;height:100%;background:#2e8b57;border-radius:2px}
@@ -51,7 +53,7 @@ footer{font-size:12px;color:#6b8280;padding:14px 4px 30px;line-height:1.7}
 <button class="sp" data-s="1">١×</button><button class="sp" data-s="1.25">١٫٢٥×</button><button class="sp" data-s="1.5">١٫٥×</button><button class="sp" data-s="2">٢×</button>
 </div>
 <ol id="list"></ol>
-<footer>شرح للمذاكرة والمراجعة بصوت وشرائح مولّدة بالذكاء الاصطناعي، اعتمادًا على كتاب الوجيز في التنفيذ الجبري. قد يتضمن أخطاء، ولا يغني عن الكتاب ومحاضراتك.</footer>
+<footer><div style="font-weight:700;color:#0f3d3e;margin-bottom:6px">فكرة وإشراف: بهي الدين | Bahy El Din</div>شرح للمذاكرة والمراجعة بصوت وشرائح مولّدة بالذكاء الاصطناعي، اعتمادًا على كتاب الوجيز في التنفيذ الجبري. قد يتضمن أخطاء، ولا يغني عن الكتاب ومحاضراتك.</footer>
 </main>
 <script src="data.js"></script>
 <script>
@@ -66,7 +68,7 @@ function fmt(n){return String(n).replace(/\d/g,function(d){return"٠١٢٣٤٥٦
 function tabs(){var t=document.getElementById("tabs");t.innerHTML="";D.subjects.forEach(function(s){var b=document.createElement("button");b.className="tab"+(s===S?" on":"");b.textContent=s.name;b.onclick=function(){pick(s,0)};t.appendChild(b)})}
 function list(){var o=document.getElementById("list");o.innerHTML="";S.videos.forEach(function(x,i){var p=P[x.id]||{};var li=document.createElement("li");li.className=i===idx?"cur":"";
 var pct=p.d?Math.min(100,Math.round(p.t/p.d*100)):0;
-li.innerHTML='<div class="n">'+x.label+'</div><div class="t">'+x.title+'<div class="bar"><i style="width:'+pct+'%"></i></div></div><div class="m">'+(p.done?'<span class="done">✓ </span>':'')+fmt(x.minutes)+' د<br>'+x.pages+'<br>'+dlBtn(x)+'</div>';
+li.innerHTML='<div class="top"><span class="n">'+x.label+(p.done?' <span class="done">✓</span>':'')+'</span><span class="m">'+x.pages+' · '+fmt(x.minutes)+' دقيقة</span></div><div class="t">'+x.title+'</div><div class="bar"><i style="width:'+pct+'%"></i></div><div class="act">'+dlBtn(x)+'</div>';
 li.onclick=function(e){if(e.target.closest&&e.target.closest('.dl')){e.stopPropagation();dlClick(x);return}play(i,true)};o.appendChild(li)})}
 var AND=window.Android&&window.Android.state?window.Android:null;
 function fname(x){return x.file.split('/').pop()}
