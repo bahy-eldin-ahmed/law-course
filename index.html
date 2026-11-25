@@ -33,6 +33,9 @@ li .act{margin-top:2px}
 li .done{color:#2e8b57;font-weight:700}
 .bar{height:4px;background:#e0e8e6;border-radius:2px;margin-top:6px}
 .bar i{display:block;height:100%;background:#2e8b57;border-radius:2px}
+#resume{display:none;background:#d9a441;color:#12302f;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;line-height:1.8}
+#resume button{border:none;background:#0f3d3e;color:#fff;border-radius:8px;padding:6px 14px;font-size:14px;margin-inline-start:6px}
+li .res{font-size:12px;color:#0f3d3e;font-weight:700;margin-top:4px}
 footer{font-size:12px;color:#6b8280;padding:14px 4px 30px;line-height:1.7}
 #err{color:#b00020;font-size:14px;display:none;margin:6px 0}
 .dl{border:1px solid #0f3d3e;background:#fff;color:#0f3d3e;border-radius:8px;padding:5px 9px;font-size:12px;white-space:nowrap;margin-top:6px;display:inline-block;text-decoration:none}
@@ -45,6 +48,7 @@ footer{font-size:12px;color:#6b8280;padding:14px 4px 30px;line-height:1.7}
 <main>
 <div class="tabs" id="tabs"></div>
 <p class="src" id="src"></p>
+<div id="resume"></div>
 <video id="v" controls playsinline preload="metadata"></video>
 <div id="err">تعذّر تشغيل الفيديو. تأكد من اتصال الإنترنت وحاول مرة أخرى.</div>
 <div id="now"></div><div id="meta"></div>
@@ -65,11 +69,15 @@ function ld(k,d){try{var x=localStorage.getItem(k);return x?JSON.parse(x):d}catc
 function sv(k,x){try{localStorage.setItem(k,JSON.stringify(x))}catch(e){}}
 P=ld("prog",{});
 function fmt(n){return String(n).replace(/\d/g,function(d){return"٠١٢٣٤٥٦٧٨٩"[d]})}
+function tstr(s){s=Math.max(0,Math.floor(s));var m=Math.floor(s/60),r=s%60;return fmt(m)+":"+fmt((r<10?"0":"")+r)}
+function banner(){var r=document.getElementById("resume");if(!S)return;var i=ld("last_"+S.id,0);if(i>=S.videos.length)i=0;var x=S.videos[i];var p=x&&P[x.id];
+ if(p&&p.t>10&&!p.done&&(!p.d||p.t<p.d-5)){r.style.display="block";r.innerHTML='وصلت لـ <b>'+x.label+'</b> ووقفت عند '+tstr(p.t)+' <button type="button" id="rbtn">▶ كمّل من هناك</button>';document.getElementById("rbtn").onclick=function(){play(i,true)}}
+ else r.style.display="none"}
 function tabs(){var t=document.getElementById("tabs");t.innerHTML="";D.subjects.forEach(function(s){var b=document.createElement("button");b.className="tab"+(s===S?" on":"");b.textContent=s.name;b.onclick=function(){pick(s,0)};t.appendChild(b)})}
 function list(){var o=document.getElementById("list");o.innerHTML="";S.videos.forEach(function(x,i){var p=P[x.id]||{};var li=document.createElement("li");li.className=i===idx?"cur":"";
 var pct=p.d?Math.min(100,Math.round(p.t/p.d*100)):0;
-li.innerHTML='<div class="top"><span class="n">'+x.label+(p.done?' <span class="done">✓</span>':'')+'</span><span class="m">'+x.pages+' · '+fmt(x.minutes)+' دقيقة</span></div><div class="t">'+x.title+'</div><div class="bar"><i style="width:'+pct+'%"></i></div><div class="act">'+dlBtn(x)+'</div>';
-li.onclick=function(e){if(e.target.closest&&e.target.closest('.dl')){e.stopPropagation();dlClick(x);return}play(i,true)};o.appendChild(li)})}
+li.innerHTML='<div class="top"><span class="n">'+x.label+(p.done?' <span class="done">✓</span>':'')+'</span><span class="m">'+x.pages+' · '+fmt(x.minutes)+' دقيقة</span></div><div class="t">'+x.title+'</div><div class="bar"><i style="width:'+pct+'%"></i></div>'+(p.t>5&&!p.done?'<div class="res">وقفت عند '+tstr(p.t)+'</div>':'')+'<div class="act">'+dlBtn(x)+'</div>';
+li.onclick=function(e){if(e.target.closest&&e.target.closest('.dl')){e.stopPropagation();dlClick(x);return}play(i,true)};o.appendChild(li)})}banner()
 var AND=window.Android&&window.Android.state?window.Android:null;
 function fname(x){return x.file.split('/').pop()}
 function dlState(x){return AND?AND.state(fname(x)):'web'}
