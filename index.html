@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f3d3e">
+<title>مكتبة المواد</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;background:#f3f6f5;color:#12302f}
+header{background:#0f3d3e;color:#fff;padding:14px 16px}
+header h1{margin:0;font-size:20px}
+header p{margin:4px 0 0;font-size:13px;opacity:.85}
+main{max-width:900px;margin:0 auto;padding:12px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px}
+.tab{border:1px solid #0f3d3e;background:#fff;color:#0f3d3e;border-radius:20px;padding:8px 16px;font-size:15px;white-space:nowrap}
+.tab.on{background:#0f3d3e;color:#fff}
+.src{font-size:13px;color:#4a6362;margin:0 0 10px}
+video{width:100%;background:#000;border-radius:10px;max-height:60vh}
+#now{margin:10px 0 4px;font-size:17px;font-weight:700}
+#meta{font-size:13px;color:#4a6362;margin-bottom:8px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ctl button{border:1px solid #c5d3d1;background:#fff;border-radius:8px;padding:7px 12px;font-size:14px}
+.ctl button.on{background:#d9a441;border-color:#d9a441;font-weight:700}
+ol{list-style:none;margin:0;padding:0}
+li{background:#fff;border-radius:10px;margin-bottom:8px;padding:12px;display:flex;gap:10px;align-items:center;border:2px solid transparent;cursor:pointer}
+li.cur{border-color:#d9a441}
+li .n{font-weight:700;color:#0f3d3e;min-width:92px;font-size:14px}
+li .t{flex:1;font-size:14px;line-height:1.5}
+li .m{font-size:12px;color:#6b8280;text-align:left}
+li .done{color:#2e8b57;font-weight:700}
+.bar{height:4px;background:#e0e8e6;border-radius:2px;margin-top:6px}
+.bar i{display:block;height:100%;background:#2e8b57;border-radius:2px}
+footer{font-size:12px;color:#6b8280;padding:14px 4px 30px;line-height:1.7}
+#err{color:#b00020;font-size:14px;display:none;margin:6px 0}
+.dl{border:1px solid #0f3d3e;background:#fff;color:#0f3d3e;border-radius:8px;padding:5px 9px;font-size:12px;white-space:nowrap;margin-top:6px;display:inline-block;text-decoration:none}
+.dl.ok{background:#2e8b57;color:#fff;border-color:#2e8b57}
+.dl.run{background:#d9a441;border-color:#d9a441}
+</style>
+</head>
+<body>
+<header><h1>مكتبة المواد</h1><p>شرح مرتب للمواد الدراسية، فيديو بعد فيديو</p></header>
+<main>
+<div class="tabs" id="tabs"></div>
+<p class="src" id="src"></p>
+<video id="v" controls playsinline preload="metadata"></video>
+<div id="err">تعذّر تشغيل الفيديو. تأكد من اتصال الإنترنت وحاول مرة أخرى.</div>
+<div id="now"></div><div id="meta"></div>
+<div class="ctl">
+<button id="prev">السابق</button><button id="next">التالي</button>
+<button class="sp" data-s="1">١×</button><button class="sp" data-s="1.25">١٫٢٥×</button><button class="sp" data-s="1.5">١٫٥×</button><button class="sp" data-s="2">٢×</button>
+</div>
+<ol id="list"></ol>
+<footer>شرح للمذاكرة والمراجعة بصوت وشرائح مولّدة بالذكاء الاصطناعي، اعتمادًا على كتاب الوجيز في التنفيذ الجبري. قد يتضمن أخطاء، ولا يغني عن الكتاب ومحاضراتك.</footer>
+</main>
+<script src="data.js"></script>
+<script>
+var REMOTE="https://bahy-eldin-ahmed.github.io/law-course/";
+var BASE=location.protocol==="file:"?REMOTE:"";
+var D=window.COURSE_DATA,S=null,idx=0,P={};
+var v=document.getElementById("v");
+function ld(k,d){try{var x=localStorage.getItem(k);return x?JSON.parse(x):d}catch(e){return d}}
+function sv(k,x){try{localStorage.setItem(k,JSON.stringify(x))}catch(e){}}
+P=ld("prog",{});
+function fmt(n){return String(n).replace(/\d/g,function(d){return"٠١٢٣٤٥٦٧٨٩"[d]})}
+function tabs(){var t=document.getElementById("tabs");t.innerHTML="";D.subjects.forEach(function(s){var b=document.createElement("button");b.className="tab"+(s===S?" on":"");b.textContent=s.name;b.onclick=function(){pick(s,0)};t.appendChild(b)})}
+function list(){var o=document.getElementById("list");o.innerHTML="";S.videos.forEach(function(x,i){var p=P[x.id]||{};var li=document.createElement("li");li.className=i===idx?"cur":"";
+var pct=p.d?Math.min(100,Math.round(p.t/p.d*100)):0;
+li.innerHTML='<div class="n">'+x.label+'</div><div class="t">'+x.title+'<div class="bar"><i style="width:'+pct+'%"></i></div></div><div class="m">'+(p.done?'<span class="done">✓ </span>':'')+fmt(x.minutes)+' د<br>'+x.pages+'<br>'+dlBtn(x)+'</div>';
+li.onclick=function(e){if(e.target.closest&&e.target.closest('.dl')){e.stopPropagation();dlClick(x);return}play(i,true)};o.appendChild(li)})}
+var AND=window.Android&&window.Android.state?window.Android:null;
+function fname(x){return x.file.split('/').pop()}
+function dlState(x){return AND?AND.state(fname(x)):'web'}
+function dlBtn(x){var s=dlState(x);
+ if(s==='web')return '<a class="dl" href="'+BASE+x.file+'" download="'+fname(x)+'">تنزيل للمشاهدة بدون نت</a>';
+ if(s==='done')return '<span class="dl ok">محمّل ✓ (اضغط للحذف)</span>';
+ if(s==='running')return '<span class="dl run">جارٍ التنزيل…</span>';
+ return '<span class="dl">تنزيل للمشاهدة بدون نت</span>'}
+function dlClick(x){if(!AND)return;var s=AND.state(fname(x));
+ if(s==='done'){if(confirm('حذف الفيديو المحمّل من الجهاز؟'))AND.remove(fname(x))}
+ else if(s==='none'){AND.download(BASE+x.file,fname(x))}
+ list()}
+if(AND)setInterval(function(){if(document.querySelector('.dl.run'))list()},3000);
+function pick(s,i){S=s;tabs();document.getElementById("src").textContent="المصدر: "+s.source;play(ld("last_"+s.id,i),false)}
+function play(i,auto){if(i<0||i>=S.videos.length)return;idx=i;var x=S.videos[i];sv("last_"+S.id,i);
+document.getElementById("err").style.display="none";
+var loc=AND&&AND.state(fname(x))==='done'?AND.path(fname(x)):'';v.dataset.remote=BASE+x.file;v.src=loc||BASE+x.file;document.getElementById("now").textContent=x.label+": "+x.title;document.getElementById("meta").textContent=x.pages+" · "+fmt(x.minutes)+" دقيقة";
+var p=P[x.id];v.onloadedmetadata=function(){if(p&&p.t&&!p.done&&p.t<v.duration-5)v.currentTime=p.t};
+v.load();if(auto)sp2();list()}
+function sp2(){var pr=v.play();if(pr&&pr.catch)pr.catch(function(){})}
+var last=0;
+v.ontimeupdate=function(){var now=Date.now();if(now-last<3000||!S)return;last=now;var x=S.videos[idx];P[x.id]=P[x.id]||{};P[x.id].t=v.currentTime;P[x.id].d=v.duration;sv("prog",P)};
+v.onended=function(){var x=S.videos[idx];P[x.id]={t:0,d:v.duration,done:true};sv("prog",P);if(idx<S.videos.length-1)play(idx+1,true);else list()};
+v.onerror=function(){if(v.src.indexOf("file:///android_asset")<0&&v.src.indexOf("file://")===0&&v.dataset.remote){v.src=v.dataset.remote;v.load();sp2();return}document.getElementById("err").style.display="block"};
+document.getElementById("prev").onclick=function(){play(idx-1,true)};
+document.getElementById("next").onclick=function(){play(idx+1,true)};
+Array.prototype.forEach.call(document.querySelectorAll(".sp"),function(b){b.onclick=function(){v.playbackRate=parseFloat(b.dataset.s);Array.prototype.forEach.call(document.querySelectorAll(".sp"),function(c){c.classList.toggle("on",c===b)})}});
+v.onplay=function(){var s=document.querySelector(".sp.on");if(s)v.playbackRate=parseFloat(s.dataset.s)};
+pick(D.subjects[0],0);
+fetch(BASE+"data.json",{cache:"no-store"}).then(function(r){return r.json()}).then(function(n){if(n&&n.subjects&&n.subjects.length){var cid=S.id;D=n;S=D.subjects.filter(function(s){return s.id===cid})[0]||D.subjects[0];tabs();list()}}).catch(function(){});
+</script>
+</body>
+</html>
